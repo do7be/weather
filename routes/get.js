@@ -4,10 +4,17 @@ var express = require('express');
 var router = express.Router();
 const http = require('http');
 const xml2js = require('xml2js');
+const co = require('co');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  getRss().then(function(result) {
+  co(function *() {
+    let rss = yield getRss();
+    console.log(rss);
+
+    let cityId = findCityId(rss);
+
+    let result = yield getForecast(cityId);
     res.render('get', {info: result});
   });
 });
@@ -42,4 +49,16 @@ function getRss() {
     });
   });
 }
+
+function findCityId(rss) {
+  //rss['ldWeather:source']
+  return 1;
+}
+
+function getForecast(cityId) {
+  return new Promise(function(resolve) {
+    resolve("finish");
+  });
+}
+
 module.exports = router;
