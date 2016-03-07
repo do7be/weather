@@ -6,16 +6,14 @@ const http = require('http');
 const xml2js = require('xml2js');
 const co = require('co');
 
-/* GET users listing. */
+/* GET Forecast. */
 router.get('/', function(req, res, next) {
-
   co(function *() {
     let rss = yield getRss();
-
     let cityId = yield findCityId(rss, req.query.city);
-
     let forecast = yield getForecast(cityId);
 
+    // encode to utf-8
     var body = forecast.replace(/(\\u)([0-9a-fA-F]{4})/g, function(match, p1, p2) {
       return String.fromCharCode(parseInt(p2, 16));
     });
