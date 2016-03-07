@@ -8,11 +8,11 @@ Root: http://weather.do7be.com
 
 ### Get Weather Info
 
-`GET /`
+`GET /get`
 
 * Param
   * city
 
 Example
 
-http://weather.do7be.com?city=東京
+http://weather.do7be.com/get?city=東京
