@@ -8,13 +8,14 @@ const co = require('co');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
+
   co(function *() {
     let rss = yield getRss();
-    console.log(rss);
 
-    let cityId = findCityId(rss);
+    let cityId = yield findCityId(rss, req.query.city);
 
     let result = yield getForecast(cityId);
+
     res.render('get', {info: result});
   });
 });
@@ -39,8 +40,7 @@ function getRss() {
           if(err) {
             console.log(err);
           } else {
-            console.log(result.rss.channel);
-            resolve("hoge");
+            resolve(result.rss.channel);
           }
         });
       });
@@ -50,9 +50,19 @@ function getRss() {
   });
 }
 
-function findCityId(rss) {
-  //rss['ldWeather:source']
-  return 1;
+function findCityId(rss, cityName) {
+  return new Promise(function(resolve) {
+    const prefs = rss[0]['ldWeather:source'][0]['pref'];
+    prefs.forEach(function (pref) {
+      pref.city.forEach(function (city) {
+        if (city['$'].title == cityName) {
+          resolve(city['$'].id);
+        }
+      });
+    });
+  });
+
+  return resolve(null);
 }
 
 function getForecast(cityId) {
