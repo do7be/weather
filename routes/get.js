@@ -8,9 +8,15 @@ const co = require('co');
 
 /* GET Forecast. */
 router.get('/', function(req, res, next) {
+  if (typeof req.query.city == 'undefined') {
+    res.send('Invalid param.');
+  }
   co(function *() {
     let rss = yield getRss();
     let cityId = yield findCityId(rss, req.query.city);
+    if (cityId === null) {
+      res.send('not found city.');
+    }
     let forecast = yield getForecast(cityId);
 
     // encode to utf-8
@@ -18,7 +24,7 @@ router.get('/', function(req, res, next) {
       return String.fromCharCode(parseInt(p2, 16));
     });
 
-    res.render('get', {info: body});
+    res.send(body);
   });
 });
 
@@ -64,9 +70,8 @@ function findCityId(rss, cityName) {
         }
       });
     });
+    return resolve(null);
   });
-
-  return resolve(null);
 }
 
 function getForecast(cityId) {
