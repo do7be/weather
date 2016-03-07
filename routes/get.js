@@ -14,9 +14,13 @@ router.get('/', function(req, res, next) {
 
     let cityId = yield findCityId(rss, req.query.city);
 
-    let result = yield getForecast(cityId);
+    let forecast = yield getForecast(cityId);
 
-    res.render('get', {info: result});
+    var body = forecast.replace(/(\\u)([0-9a-fA-F]{4})/g, function(match, p1, p2) {
+      return String.fromCharCode(parseInt(p2, 16));
+    });
+
+    res.render('get', {info: body});
   });
 });
 
@@ -39,6 +43,7 @@ function getRss() {
         xml2js.parseString(body, (err, result)=> {
           if(err) {
             console.log(err);
+            resolve(err);
           } else {
             resolve(result.rss.channel);
           }
@@ -46,6 +51,7 @@ function getRss() {
       });
     }).on('error', function(e) {
       console.log("Got error: " + e.message);
+      resolve("Got error: " + e.message);
     });
   });
 }
@@ -67,7 +73,26 @@ function findCityId(rss, cityName) {
 
 function getForecast(cityId) {
   return new Promise(function(resolve) {
-    resolve("finish");
+    var options = {
+      host: 'weather.livedoor.com',
+      port: 80,
+      path: '/forecast/webservice/json/v1?city=' + cityId,
+    };
+
+    http.get(options, function(httpRes) {
+      let body = '';
+      httpRes.setEncoding('utf8');
+      httpRes.on('data', (chunk) => {
+        body += chunk;
+      });
+
+      httpRes.on('end', (httpRes) => {
+        resolve(body);
+      });
+    }).on('error', function(e) {
+      console.log("Got error: " + e.message);
+      resolve("Got error: " + e.message);
+    });
   });
 }
 
