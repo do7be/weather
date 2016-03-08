@@ -23,8 +23,7 @@ router.get('/', function(req, res, next) {
     var body = forecast.replace(/(\\u)([0-9a-fA-F]{4})/g, function(match, p1, p2) {
       return String.fromCharCode(parseInt(p2, 16));
     });
-    res.contentType('application/json');
-    res.send(JSON.stringify(body));
+    res.json(JSON.parse(body));
   });
 });
 
